@@ -21,6 +21,7 @@ function apiListTasks() {
     )
 }
 
+
 function renderTask(taskId, title, description, status) {
     const section = document.createElement('section');
     section.className = 'card mt-5 shadow-sm';
@@ -48,18 +49,28 @@ function renderTask(taskId, title, description, status) {
     if(status == 'open') {
         const finishButton = document.createElement('button');
         finishButton.className = 'btn btn-dark btn-sm js-task-open-only';
-        finishButton.innerText = 'Finish';
+        finishButton.innerText = 'Zakończ';
         headerRightDiv.appendChild(finishButton);
     }
 
     const deleteButton = document.createElement('button');
     deleteButton.className = 'btn btn-outline-danger btn-sm ml-2';
-    deleteButton.innerText = 'Delete';
+    deleteButton.innerText = 'Skasuj';
     headerRightDiv.appendChild(deleteButton);
 
     const ul = document.createElement('ul');
     ul.className = 'list-group list-group-flush';
     section.appendChild(ul);
+
+    apiListOperationsForTask(taskId).then(
+        function (response){
+            response.data.forEach(
+                function (operation) {
+                    renderOperation(ul, status, operation.id, operation.description, operation.timeSpent)
+                }
+            )
+        }
+    )
 
     if(status == 'open'){
         const addOperationDiv = document.createElement('div');
@@ -75,7 +86,7 @@ function renderTask(taskId, title, description, status) {
 
         const descriptionInput = document.createElement('input');
         descriptionInput.setAttribute('type', 'text');
-        descriptionInput.setAttribute('placeholder', 'Operation description');
+        descriptionInput.setAttribute('placeholder', 'Opis zadania');
         descriptionInput.setAttribute('minlength', '5');
         descriptionInput.className = 'form-control';
         inputGroup.appendChild(descriptionInput);
@@ -86,11 +97,74 @@ function renderTask(taskId, title, description, status) {
 
         const addButton = document.createElement('button');
         addButton.className = 'btn btn-info';
-        addButton.innerText = 'Add';
+        addButton.innerText = 'Dodaj';
         inputGroupAppend.appendChild(addButton);
 
     }
 }
+
+function apiListOperationsForTask(taskId) {
+    return fetch(
+        apihost + '/api/tasks/' + taskId + '/operations',
+        { headers: { 'Authorization': apikey } }
+    ).then(
+        function (resp) {
+            if(!resp.ok) {
+                alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
+            }
+            return resp.json();
+        }
+    );
+}
+
+// zamiana operationsList na ul
+function renderOperation(ul, status, operationId, operationDescription, timeSpent) {
+    const li = document.createElement('li');
+    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+    // operationsList to lista <ul> // zamiana na <ul>
+    ul.appendChild(li);
+
+    const descriptionDiv = document.createElement('div');
+    descriptionDiv.innerText = operationDescription;
+    li.appendChild(descriptionDiv);
+
+    const time = document.createElement('span');
+    time.className = 'badge badge-success badge-pill ml-2';
+    time.innerText = formatTime(timeSpent);
+    descriptionDiv.appendChild(time);
+
+    if(status == "open") {
+      const controlDiv = document.createElement('div');
+      controlDiv.className = 'js-task-open-only'; // skąd ta klasa ?
+      li.appendChild(controlDiv);
+
+      const addQuarterBtn = document.createElement('div');
+      addQuarterBtn.className = "btn btn-outline-success btn-sm mr-2";
+      addQuarterBtn.innerText = 'dodaj 15 min';
+      controlDiv.appendChild(addQuarterBtn);
+
+      const addHourBtn = document.createElement('div');
+      addHourBtn.className = "btn btn-outline-success btn-sm mr-2";
+      addHourBtn.innerText = 'dodaj 1 h';
+      controlDiv.appendChild(addHourBtn);
+
+    }
+
+}
+function formatTime(timeSpent) {
+    const hours = Math.floor(timeSpent / 60);
+    const minutes = timeSpent % 60;
+    if(hours > 0) {
+        return hours + 'h ' + minutes + 'm';
+    } else {
+        return minutes + 'm';
+    }
+}
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', function() {
     apiListTasks().then(
