@@ -2,29 +2,35 @@ const apikey = 'cd9b2a65-cb4b-4d0f-9102-42d836ccfdd5';
 const apihost = 'https://todo-api.coderslab.pl';
 
 
-function apiListTasks() {
-    return fetch(
-        apihost + '/api/tasks',
-        {
-            headers: {Authorization: apikey}
-        }
-    ).then(
-        function (resp) {
-            if (!resp.ok) {
-                alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
-            }
-            return resp.json();
-        }
-    )
-}
+// function apiListTasks() {
+//     return fetch(
+//         apihost + '/api/tasks',
+//         {
+//             headers: {Authorization: apikey}
+//         }
+//     ).then(
+//         function (resp) {
+//             if (!resp.ok) {
+//                 alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
+//             }
+//             return resp.json();
+//         }
+//     )
+// }
 
 function renderTask(taskId, title, description, status) {
+    //zmiana koloru div
+    const divCard = document.querySelector('.card-body');
+    divCard.style.backgroundColor = '#BEFF05';
+
     const section = document.createElement('section');
     section.className = 'card mt-5 shadow-sm';
     document.querySelector('main').appendChild(section);
 
+    //zmiana koloru deaderDiv
     const headerDiv = document.createElement('div');
     headerDiv.className = 'card-header d-flex justify-content-between align-items-center';
+    headerDiv.style.backgroundColor = '#BEFF05';
     section.appendChild(headerDiv);
 
     const headerLeftDiv = document.createElement('div');
@@ -85,7 +91,7 @@ function renderTask(taskId, title, description, status) {
             )
         }
     )
-    // przyciski widzoczne jezelis status zadania jest otwarty
+    // przyciski widoczne jeżeli status zadania jest otwarty
     if (status == 'open') {
         const addOperationDiv = document.createElement('div');
         addOperationDiv.className = 'card-body js-task-open-only';
@@ -328,7 +334,6 @@ function apiListAllTasks() {
     );
 }
 
-
 document.addEventListener('DOMContentLoaded', function () {
     apiListAllTasks().then(
         function(response) {
@@ -353,6 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
     );
+
 });
 
 
