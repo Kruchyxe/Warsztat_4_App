@@ -19,18 +19,26 @@ const apihost = 'https://todo-api.coderslab.pl';
 // }
 
 function renderTask(taskId, title, description, status) {
+    //dodanie obrazka do h1 div
+    // const newImg = document.createElement('img');
+    // newImg.setAttribute('src','/home/krzysiek/Warsztat_4_App/pl.coderslab.warsztat4/images/task.jpg');
+    // const addImage = document.querySelector('.card-title');
+    // addImage.appendChild(newImg);
+
+
     //zmiana koloru div
     const divCard = document.querySelector('.card-body');
-    divCard.style.backgroundColor = '#BEFF05';
+    divCard.style.backgroundColor = '#FFD700';
 
     const section = document.createElement('section');
     section.className = 'card mt-5 shadow-sm';
     document.querySelector('main').appendChild(section);
 
-    //zmiana koloru deaderDiv
+    //zmiana koloru headerDiv
     const headerDiv = document.createElement('div');
     headerDiv.className = 'card-header d-flex justify-content-between align-items-center';
-    headerDiv.style.backgroundColor = '#BEFF05';
+    headerDiv.style.backgroundColor = '#FFD700';
+    headerDiv.style.fontStyle = 'italic';
     section.appendChild(headerDiv);
 
     const headerLeftDiv = document.createElement('div');
@@ -294,7 +302,7 @@ function apiUpdateOperation(operationId, description, timeSpent){
     ).then(
         function (res){
             if(!res.ok) {
-                alert('Wystąpił błąd połączenia')
+                alert('Wystąpił błąd')
             }
             return res.json();
         }
