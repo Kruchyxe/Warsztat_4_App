@@ -9,11 +9,11 @@ function apiListTasks() {
     return fetch(
         apihost + '/api/tasks',
         {
-            headers: { Authorization: apikey }
+            headers: {Authorization: apikey}
         }
     ).then(
-        function(resp) {
-            if(!resp.ok) {
+        function (resp) {
+            if (!resp.ok) {
                 alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
             }
             return resp.json();
@@ -46,7 +46,7 @@ function renderTask(taskId, title, description, status) {
     const headerRightDiv = document.createElement('div');
     headerDiv.appendChild(headerRightDiv);
 
-    if(status == 'open') {
+    if (status == 'open') {
         const finishButton = document.createElement('button');
         finishButton.className = 'btn btn-dark btn-sm js-task-open-only';
         finishButton.innerText = 'Zakończ';
@@ -57,13 +57,20 @@ function renderTask(taskId, title, description, status) {
     deleteButton.className = 'btn btn-outline-danger btn-sm ml-2';
     deleteButton.innerText = 'Skasuj';
     headerRightDiv.appendChild(deleteButton);
+    deleteButton.addEventListener('click', function () {
+        apiDeleteTask(taskId).then(
+            function () {
+                section.parentElement.removeChild(section);
+            }
+        );
+    });
 
     const ul = document.createElement('ul');
     ul.className = 'list-group list-group-flush';
     section.appendChild(ul);
 
     apiListOperationsForTask(taskId).then(
-        function (response){
+        function (response) {
             response.data.forEach(
                 function (operation) {
                     renderOperation(ul, status, operation.id, operation.description, operation.timeSpent)
@@ -72,7 +79,7 @@ function renderTask(taskId, title, description, status) {
         }
     )
 
-    if(status == 'open'){
+    if (status == 'open') {
         const addOperationDiv = document.createElement('div');
         addOperationDiv.className = 'card-body js-task-open-only';
         section.appendChild(addOperationDiv);
@@ -100,16 +107,24 @@ function renderTask(taskId, title, description, status) {
         addButton.innerText = 'Dodaj';
         inputGroupAppend.appendChild(addButton);
 
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            apiCreateOperationForTask(taskId, descriptionInput.value).then(
+                function (response) {
+                    renderOperation(ul, status, response.data.id, response.data.description, response.data.timeSpent);
+             }
+            )
+        })
     }
 }
 
 function apiListOperationsForTask(taskId) {
     return fetch(
         apihost + '/api/tasks/' + taskId + '/operations',
-        { headers: { 'Authorization': apikey } }
+        {headers: {'Authorization': apikey}}
     ).then(
         function (resp) {
-            if(!resp.ok) {
+            if (!resp.ok) {
                 alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
             }
             return resp.json();
@@ -134,46 +149,101 @@ function renderOperation(ul, status, operationId, operationDescription, timeSpen
     time.innerText = formatTime(timeSpent);
     descriptionDiv.appendChild(time);
 
-    if(status == "open") {
-      const controlDiv = document.createElement('div');
-      controlDiv.className = 'js-task-open-only'; // skąd ta klasa ?
-      li.appendChild(controlDiv);
+    if (status == "open") {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'js-task-open-only'; // skąd ta klasa ?
+        li.appendChild(controlDiv);
 
-      const addQuarterBtn = document.createElement('div');
-      addQuarterBtn.className = "btn btn-outline-success btn-sm mr-2";
-      addQuarterBtn.innerText = 'dodaj 15 min';
-      controlDiv.appendChild(addQuarterBtn);
+        const addQuarterBtn = document.createElement('div');
+        addQuarterBtn.className = "btn btn-outline-success btn-sm mr-2";
+        addQuarterBtn.innerText = 'dodaj 15 min';
+        controlDiv.appendChild(addQuarterBtn);
 
-      const addHourBtn = document.createElement('div');
-      addHourBtn.className = "btn btn-outline-success btn-sm mr-2";
-      addHourBtn.innerText = 'dodaj 1 h';
-      controlDiv.appendChild(addHourBtn);
+        const addHourBtn = document.createElement('div');
+        addHourBtn.className = "btn btn-outline-success btn-sm mr-2";
+        addHourBtn.innerText = 'dodaj 1 h';
+        controlDiv.appendChild(addHourBtn);
 
     }
 
 }
+
 function formatTime(timeSpent) {
     const hours = Math.floor(timeSpent / 60);
     const minutes = timeSpent % 60;
-    if(hours > 0) {
+    if (hours > 0) {
         return hours + 'h ' + minutes + 'm';
     } else {
         return minutes + 'm';
     }
 }
 
+function apiCreateTask(title, description) {
+    return fetch(
+        apihost + '/api/tasks',
+        {
+            headers: {Authorization: apikey, 'Content-Type': 'application/json'},
+            body: JSON.stringify({title: title, description: description, status: 'open'}),
+            method: 'POST'
+        }
+    ).then(
+        function (resp) {
+            if (!resp.ok) {
+                alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
+            }
+            return resp.json();
+        }
+    )
+}
+
+function apiDeleteTask(taskId) {
+    return fetch(
+        apihost + '/api/tasks/' + taskId,
+        {
+            headers: {Authorization: apikey},
+            method: 'DELETE'
+        }
+    ).then(
+        function (resp) {
+            if (!resp.ok) {
+                alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
+            }
+            return resp.json();
+        }
+    )
+}
+
+function apiCreateOperationForTask(taskId, description) {
+    return fetch(
+        apihost + '/api/tasks/' + taskId + '/operations',
+        {
+            headers: {Authorization: apikey, 'Content-Type': 'application/json'},
+            body: JSON.stringify({description: description, timeSpent: 0}),
+            method: 'POST'
+        }
+    ).then(
+        function (resp) {
+            if (!resp.ok) {
+                alert('Wystąpił błąd! Otwórz devtools i zakładkę Sieć/Network, i poszukaj przyczyny');
+            }
+            return resp.json();
+        }
+    );
+}
 
 
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    apiListTasks().then(
-        function(response) {
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('.js-task-adding-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            // apiListTasks().then(
+            //     function (response) {
             // "response" zawiera obiekt z kluczami "error" i "data" (zob. wyżej)
             // "data" to tablica obiektów-zadań
             // uruchamiamy funkcję renderTask dla każdego zadania jakie dał nam backend
-            response.data.forEach(
-                function(task) { renderTask(task.id, task.title, task.description, task.status); }
+            apiCreateTask(event.target.elements.title.value, event.target.elements.description.value).then(
+                function (response) {
+                    renderTask(response.data.id, response.data.title, response.data.description, response.data.status);
+                }
             );
         }
     );
